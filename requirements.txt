@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+dnspython
+Pillow
+pyspellchecker
+flask
