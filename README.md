@@ -188,7 +188,11 @@ The output JSON provides a detailed breakdown of the SEO audit:
   }
 }
 ```
+### Support the Project
 
+If you find SEO ANALYZER useful and would like to support its development, consider buying me a coffee!
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/ihuzaifashoukat)
 ## 💡 Future Enhancements
 
 We're always looking to improve! Potential future features include:
