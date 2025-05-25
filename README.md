@@ -68,7 +68,7 @@ Follow these steps to set up and run the Advanced SEO Analyzer:
 1.  **Clone the Repository (Optional):**
     If you haven't already, clone this repository or ensure all project files are in a local directory.
     ```bash
-    # git clone <repository_url> # If applicable
+    # git clone https://github.com/ihuzaifashoukat/seo-analyzer
     # cd seo-analyzer
     ```
 
