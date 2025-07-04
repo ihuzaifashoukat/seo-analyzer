@@ -206,8 +206,20 @@ class ScoringModule(SEOModule):
         self._add_score(score_data, "mixed_content_penalty", self.default_weights["mixed_content_penalty"]["max_points"] if data.get("hasMixedContent") else 0, is_penalty=True, issue_msg=f"{len(data.get('mixedContentItems',[]))} mixed content items found.", success_msg="No mixed content found.")
         
         # URL Redirects Penalty (simple: penalize if any redirects happened for the main URL)
-        if data.get("hasRedirects"): self._add_score(score_data, "url_redirects_penalty", self.default_weights["url_redirects_penalty"]["max_points"] * 0.5 * len(data.get("redirectHistory",[])-1), is_penalty=True, issue_msg=f"{len(data.get('redirectHistory',[]))-1} redirects for main URL.", success_msg="No redirects for main URL.")
-        else: self._add_score(score_data, "url_redirects_penalty", 0, is_penalty=True, success_msg="No redirects for main URL.")
+        if data.get("hasRedirects"):
+            redirect_count = max(len(data.get("redirectHistory", [])) - 1, 0)
+            penalty = self.default_weights["url_redirects_penalty"]["max_points"] * 0.5 * redirect_count
+            penalty = min(self.default_weights["url_redirects_penalty"]["max_points"], penalty)
+            self._add_score(
+                score_data,
+                "url_redirects_penalty",
+                penalty,
+                is_penalty=True,
+                issue_msg=f"{redirect_count} redirects for main URL.",
+                success_msg="No redirects for main URL."
+            )
+        else:
+            self._add_score(score_data, "url_redirects_penalty", 0, is_penalty=True, success_msg="No redirects for main URL.")
 
 
         self._add_score(score_data, "custom_404_page_score", self.default_weights["custom_404_page_score"]["max_points"] if data.get("hasCustom404PageHeuristic") else 0, issue_msg="Custom 404 page might be missing or generic.", success_msg="Custom 404 page detected.")
