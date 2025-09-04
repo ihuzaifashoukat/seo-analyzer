@@ -4,3 +4,4 @@ dnspython
 Pillow
 pyspellchecker
 flask
+playwright

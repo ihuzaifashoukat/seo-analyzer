@@ -1,0 +1,50 @@
+DEFAULT_WEIGHTS = {
+    # On-Page
+    "title_score": {"max_points": 10, "weight": 1.5},
+    "meta_description_score": {"max_points": 8, "weight": 1.2},
+    "headings_score": {"max_points": 10, "weight": 1.2},
+    "image_alt_text_score": {"max_points": 7, "weight": 1},
+    "responsive_image_score": {"max_points": 5, "weight": 0.8},
+    "content_length_score": {"max_points": 8, "weight": 1},
+    "internal_links_score": {"max_points": 5, "weight": 0.7},
+    "broken_links_penalty": {"max_points": 10, "weight": 1.5},
+    "open_graph_score": {"max_points": 3, "weight": 0.7},
+    "twitter_card_score": {"max_points": 3, "weight": 0.7},
+    "seo_friendly_url_score": {"max_points": 5, "weight": 1},
+    "inline_css_penalty": {"max_points": 3, "weight": 0.5},
+    "deprecated_html_penalty": {"max_points": 5, "weight": 0.8},
+    "flash_content_penalty": {"max_points": 5, "weight": 1},
+    "frameset_penalty": {"max_points": 5, "weight": 1},
+    "unsafe_cross_origin_links_penalty": {"max_points": 4, "weight": 0.8},
+
+    # Technical
+    "https_score": {"max_points": 10, "weight": 1.5},
+    "robots_txt_score": {"max_points": 5, "weight": 1},
+    "sitemap_score": {"max_points": 5, "weight": 1},
+    "canonical_tag_score": {"max_points": 7, "weight": 1.2},
+    "mobile_responsive_score": {"max_points": 10, "weight": 1.5},
+    "structured_data_score": {"max_points": 8, "weight": 1},
+    "meta_robots_score": {"max_points": 5, "weight": 1},
+    "http_version_score": {"max_points": 3, "weight": 0.7},
+    "hsts_score": {"max_points": 4, "weight": 0.8},
+    "mixed_content_penalty": {"max_points": 8, "weight": 1.2},
+    "url_redirects_penalty": {"max_points": 5, "weight": 0.8},
+    "custom_404_page_score": {"max_points": 3, "weight": 0.5},
+    "html_page_size_score": {"max_points": 5, "weight": 0.8},
+    "dom_size_score": {"max_points": 5, "weight": 0.8},
+    "html_compression_score": {"max_points": 4, "weight": 1},
+    "page_cache_score": {"max_points": 5, "weight": 0.7},
+    "favicon_score": {"max_points": 2, "weight": 0.5},
+    "charset_score": {"max_points": 2, "weight": 0.8},
+    "doctype_score": {"max_points": 2, "weight": 1},
+
+    # Content
+    "readability_score": {"max_points": 10, "weight": 1},
+    "keyword_usage_score": {"max_points": 10, "weight": 1.2},
+    "most_common_keywords_score": {"max_points": 5, "weight": 0.8},
+    "text_html_ratio_score": {"max_points": 5, "weight": 0.7},
+    "spell_check_penalty": {"max_points": 5, "weight": 0.8},
+
+    "category_weights": {"OnPage": 0.40, "Technical": 0.35, "Content": 0.25},
+}
+

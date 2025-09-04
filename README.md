@@ -1,217 +1,271 @@
-# Advanced SEO Analyzer: Comprehensive Python SEO Audit Tool 🐍📊
+# Advanced SEO Analyzer
 
-[![Python Version](https://img.shields.io/badge/python-3.7%2B-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](CONTRIBUTING.md)
+A modern, modular SEO analysis toolkit for Python. Run focused page-level audits or full site crawls, capture technical/content issues with clear severities, and export structured data for reporting. Built with extensibility in mind and designed for practical, actionable insights.
 
-The **Advanced SEO Analyzer** is a versatile Python-based command-line tool and web service for performing a thorough SEO audit of any webpage. It's designed to be modular, allowing for easy expansion and customization of SEO checks to help you effectively optimize your web presence.
+## Highlights
 
-Discover key insights into your website's on-page, technical, and content SEO. Use this information to improve search engine rankings and enhance user experience.
+- On-page, Technical, and Content analyzers with unified scoring
+- Full Site Audit (Ahrefs-style) with concurrency, filtering, and exports
+- LLM/AI directives checklist (llms.txt / ai.txt)
+- Optional Lighthouse/CrUX metrics via PageSpeed Insights API
+- Duplicate detection across titles, descriptions, and visible text
+- Link graph, redirect chains/loops, status distribution, and internal link suggestions
+- REST API (Flask) and rich CLI with mobile-first and JS rendering options
 
-## ✨ Key Features
+## Contents
 
-This SEO audit tool provides a detailed analysis across several key areas:
-
-**1. On-Page Analysis (`OnPageAnalyzer`):**
-   - **Meta Tags**: Title (content, length, duplication), Description (content, length).
-   - **Heading Structure**: H1-H6 content, counts, H1 uniqueness.
-   - **Image SEO**: Alt attributes, responsive image patterns (`srcset`, `picture`), aspect ratio hints.
-   - **Link Audit**: Internal/external link counts, no-follow internal links, anchor text length, active broken link checking (limited), unsafe cross-origin links (`rel="noopener"`).
-   - **Content Quality**: Word count, content length sufficiency, paragraph count, Lorem Ipsum detection.
-   - **Technical Elements**: iFrames, Apple Touch Icon, external JS/CSS file counts, inline CSS, deprecated HTML tags, Flash detection, nested tables, framesets.
-   - **Social Media**: Open Graph and Twitter Card meta tag detection.
-   - **URL Structure**: SEO-friendly URL checks (length, depth, characters, file extensions).
-   - **Favicon**: Presence and URL.
-
-**2. Technical SEO Analysis (`TechnicalSEOAnalyzer`):**
-   - **Core Web Vitals & Performance Hints**: HTML page size, DOM element count, HTML compression (GZIP), HTTP/2, HSTS, server signature, page caching headers (Cache-Control, Expires), CDN usage hints.
-   - **Crawlability & Indexability**: Doctype, charset, `robots.txt` (sitemap declarations, disallows), sitemap presence, meta viewport, AMP detection, language declaration, `hreflang` tags, canonical tags, `noindex`/`nofollow` meta tags.
-   - **Security**: SSL/HTTPS verification, mixed content detection, plaintext emails, meta refresh.
-   - **Structured Data**: JSON-LD, Microdata, general Schema.org detection.
-   - **Analytics**: Google Analytics (GA/Gtag) detection.
-   - **Server Configuration**: URL redirects tracing, custom 404 page checks, directory browsing checks, SPF records (requires `dnspython`), `ads.txt` presence.
-
-**3. Content Analysis (`ContentAnalyzer`):**
-   - **Keyword Insights**: Top N keywords (keyword cloud data), target keyword usage analysis (presence, density).
-   - **Readability**: Flesch Reading Ease score.
-   - **Content Metrics**: Text-to-HTML ratio.
-   - **Quality Checks**: Basic spell check (requires `pyspellchecker`).
-
-**4. SEO Scoring (`ScoringModule`):**
-   - **Categorized Scores**: On-Page, Technical, and Content SEO scores.
-   - **Overall SEO Score**: A detailed percentage showing the page's SEO status.
-   - **Actionable Feedback**: Lists of identified issues and successes for each category.
-   - **Configurable Weights**: Customize scoring criteria via a JSON configuration file.
-
-## 📂 Project Structure
-
-```
-seo-analyzer/
-├── app.py                  # Main script to run the analyzer (CLI & API)
-├── requirements.txt        # Python dependencies
-├── README.md               # This file
-├── LICENSE                 # Project's MIT License
-├── modules/
-│   ├── __init__.py         # Makes 'modules' a Python package
-│   ├── base_module.py      # Abstract base class for SEO modules
-│   ├── on_page_analyzer.py
-│   ├── technical_seo_analyzer.py
-│   ├── content_analyzer.py
-│   └── scoring_module.py     # Calculates SEO scores
-└── reports/                  # Directory for saved JSON reports (created automatically)
-```
-
-## 🚀 Getting Started
-
-Follow these steps to set up and run the Advanced SEO Analyzer:
-
-1.  **Clone the Repository (Optional):**
-    If you haven't already, clone this repository or ensure all project files are in a local directory.
-    ```bash
-    # git clone https://github.com/ihuzaifashoukat/seo-analyzer
-    # cd seo-analyzer
-    ```
-
-2.  **Create and Activate a Virtual Environment (Recommended):**
-    ```bash
-    python -m venv venv
-    ```
-    Activate it:
-    -   Windows: `venv\Scripts\activate`
-    -   macOS/Linux: `source venv/bin/activate`
-
-3.  **Install Dependencies:**
-    Navigate to the project directory in your terminal and run:
-    ```bash
-    pip install -r requirements.txt
-    ```
-    This installs `requests`, `beautifulsoup4`, `dnspython`, `pyspellchecker`, and `Flask`.
-
-4.  **Run the Analyzer:**
-    The tool operates in two modes: Command-Line Interface (CLI) or as a Flask Web Service (API).
-
-    **A. Command-Line Interface (CLI) Mode:**
-    To analyze a specific URL, execute the `app.py` script from the project's root directory:
-    ```bash
-    python app.py <YOUR_WEBSITE_URL>
-    ```
-    Example:
-    ```bash
-    python app.py https://www.example.com
-    ```
-
-    **CLI Optional Arguments:**
-    -   `--output <format>`: Specify report format. Supports `json` (default) and `txt`.
-        ```bash
-        python app.py https://www.example.com --output json
-        ```
-    -   `--keywords <keyword1> ["<keyword phrase 2>"] ...`: Define target keywords for content analysis.
-        ```bash
-        python app.py https://www.example.com --keywords "seo audit tool" "python seo"
-        ```
-    -   `--config <path_to_config.json>`: Use a custom JSON configuration file to override default settings and scoring weights.
-        ```bash
-        python app.py https://www.example.com --config custom_config.json
-        ```
-        Example `custom_config.json`:
-        ```json
-        {
-            "OnPageAnalyzer": {
-                "title_min_length": 25,
-                "desc_max_length": 155
-            },
-            "ScoringModule": {
-                "weights": { "title_score": {"max_points": 15, "weight": 1.5} },
-                "category_weights": { "OnPage": 0.50, "Technical": 0.30, "Content": 0.20 }
-            },
-            "Global": { "request_timeout": 15 }
-        }
-        ```
-
-    **B. Flask Web Service (API) Mode:**
-    To run the analyzer as a web service, execute `app.py` without specifying a URL:
-    ```bash
-    python app.py
-    ```
-    The server will start by default on `http://127.0.0.1:5000/`.
-    -   You can use the `--config <path_to_config.json>` argument to load a custom configuration for the server. This config will apply to all API requests.
-
-    **API Endpoint:**
-    -   `POST /analyze` or `GET /analyze`
-    -   **Parameters:**
-        -   `url` (required): The URL to analyze.
-        -   `keywords` (optional): Comma-separated string of keywords (for GET) or a JSON list (for POST).
-    -   **Example GET Request:**
-        ```
-        http://127.0.0.1:5000/analyze?url=https://www.example.com&keywords=seo%20tools,python
-        ```
-    -   **Example POST Request (with JSON body):**
-        ```json
-        {
-            "url": "https://www.example.com",
-            "keywords": ["seo tools", "python for seo"]
-        }
-        ```
-    -   **Response:** The API returns a JSON object identical to the report generated in CLI mode.
-
-5.  **View Reports:**
-    -   **CLI Mode**: Analysis reports are saved in the `reports/` directory. Filenames include a timestamp and the domain.
-    -   **API Mode**: Responses are returned directly as JSON.
-
-## 📄 Output JSON Structure
-
-The output JSON provides a detailed breakdown of the SEO audit:
-
-```json
-{
-  "analysis_timestamp": "YYYY-MM-DDTHH:MM:SS.ffffff",
-  "target_url": "https://www.analyzed-url.com/",
-  "domain": "www.analyzed-url.com",
-  "seo_attributes": {
-    "OnPageAnalyzer": {
-      // ... on-page metrics ...
-    },
-    "TechnicalSEOAnalyzer": {
-      // ... technical metrics ...
-    },
-    "ContentAnalyzer": {
-      // ... content analysis metrics ...
-    },
-    "ScoringModule": {
-        "on_page_score_percent": 85.0,
-        "on_page_issues": ["Issue 1...", "Issue 2..."],
-        "on_page_successes": ["Success 1...", "Success 2..."],
-        // ... other category scores, issues, successes ...
-        "overall_seo_score_percent": 82.5,
-        "scoring_status": "completed"
-    }
-  }
-}
-```
-### Support the Project
-
-If you find SEO ANALYZER useful and would like to support its development, consider buying me a coffee!
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/ihuzaifashoukat)
-## 💡 Future Enhancements
-
-We're always looking to improve! Potential future features include:
--   **Advanced Rendering Analysis**: Integration with headless browsers (Selenium/Playwright) for JavaScript error testing, console logs, LCP/CLS metrics, and mobile snapshots.
--   **External API Integrations**: Checks for Safe Browsing, related keywords, and competitor domain analysis.
--   **Deeper Asset Analysis**: Modern image format usage (WebP, AVIF), image metadata, JS/CSS minification.
--   **Expanded Output Formats**: HTML reports, CSV exports.
--   **User Interface**: A dedicated web interface for easier interaction.
-
-## 🤝 Contributing
-
-Contributions are welcome! Whether it's bug fixes, feature additions, or documentation improvements, please feel free to fork the repository, make your changes, and submit a pull request.
-
-Please read `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Overview
+- Features
+- Project Structure
+- Quick Start
+- CLI Usage
+- API Usage
+- Configuration
+- Output & Exports
+- Optional Dependencies
+- Roadmap
+- Contributing & License
 
 ---
 
-*Improve your web presence with SEO insights from this tool!*
+## Overview
+
+The analyzer is split into focused subpackages: `on_page`, `technical`, `content`, `scoring`, and `site_audit`. Each module exposes a small, well-defined surface and can be extended independently. The CLI supports both single-page analysis and site-wide crawling with concurrency and filters. Results are JSON-first with optional CSV exports for pages, issues, and link edges.
+
+## Features
+
+- On-Page Analysis
+  - Title/meta description presence and lengths, duplication hints
+  - Heading structure (H1–H6), multiple H1 detection
+  - Image alt, responsive patterns, basic layout red flags
+  - Link audit (internal/external, broken links, rel, unsafe cross-origin)
+  - Content stats (word count, paragraphs, lorem ipsum)
+  - URL structure (length, depth, case), deprecated tags, inline CSS
+  - Social tags (Open Graph, Twitter Cards), favicon
+
+- Technical SEO
+  - Crawlability/Indexability: doctype, charset, viewport, AMP, language, hreflang, canonical, robots meta, structured data (JSON-LD/Microdata)
+  - Network & Headers: HTTP version, HSTS, server signature, cache headers, CDN hints
+  - Performance: DOM size, gzip, TTFB, optional PSI (Lighthouse/CrUX)
+  - Security: HTTPS usage, mixed content, plaintext emails, meta refresh
+  - Site-level: redirects chain trace, custom 404, directory browsing, SPF, ads.txt
+  - Assets: caching headers for CSS/JS/images; minification heuristics for CSS/JS
+  - LLMs: `llms.txt` / `ai.txt` detection and checklist with recommendations
+
+- Content Analysis
+  - Keyword extraction and target keyword usage
+  - Readability (Flesch Reading Ease)
+  - Text-to-HTML ratio
+  - Spellcheck (optional dependency)
+
+- Scoring
+  - Category scores (On-Page, Technical, Content) and overall score
+  - Configurable weights and category emphasis
+
+- Full Site Audit
+  - Crawler with robots.txt respect, include/exclude filters, subdomain toggle, depth/page caps, rate limiting, and optional JS rendering for discovery
+  - Concurrency for per-page analysis
+  - Issues with severity (error/warning/notice) across HTTP, redirects, sitemap, canonical, indexing, content/meta, links, international, performance, and security
+  - Status distribution, redirect loops, duplicate titles/meta/visible text, internal link graph (in/out degree) and heuristic internal link suggestions
+  - Optional exports: `pages.csv`, `issues.csv`, `edges.csv`
+
+## Project Structure
+
+```
+seo-analyzer/
+├── app.py                      # CLI & API entrypoint
+├── requirements.txt
+├── modules/
+│   ├── __init__.py
+│   ├── base_module.py          # Base with session, retries, headers
+│   ├── on_page/
+│   │   ├── __init__.py
+│   │   ├── analyzer.py         # On-page orchestrator
+│   │   ├── text_utils.py
+│   │   ├── title_meta.py
+│   │   ├── headings_links_images.py
+│   │   └── social_misc.py
+│   ├── technical/
+│   │   ├── __init__.py
+│   │   ├── analyzer.py         # Technical orchestrator
+│   │   ├── network.py
+│   │   ├── html_core.py
+│   │   ├── metrics.py
+│   │   ├── site_checks.py
+│   │   ├── assets.py
+│   │   ├── llms_txt.py         # LLMs/AI directives checklist
+│   │   └── performance_api.py  # PageSpeed Insights (optional)
+│   ├── content/
+│   │   ├── __init__.py
+│   │   ├── analyzer.py
+│   │   ├── text_utils.py
+│   │   ├── keywords.py
+│   │   ├── readability.py
+│   │   ├── ratio.py
+│   │   └── spellcheck.py
+│   ├── scoring/
+│   │   ├── __init__.py
+│   │   ├── analyzer.py
+│   │   ├── weights.py
+│   │   ├── util.py
+│   │   ├── on_page.py
+│   │   ├── technical.py
+│   │   └── content.py
+│   └── site_audit/
+│       ├── __init__.py
+│       ├── crawler.py          # Discovery crawler
+│       ├── render.py           # Optional Playwright renderer
+│       ├── audit.py            # Crawl + analyze + aggregate
+│       ├── issues.py           # Issue model & derivation
+│       ├── duplication.py      # Duplicate grouping helpers
+│       ├── sitemap.py          # Sitemap parsing & bucketing
+│       ├── export.py           # CSV exporters
+│       └── compare.py          # Diff between audit reports
+└── README.md
+```
+
+## Quick Start
+
+1) Python env
+- Python 3.8+
+- Optional: `python -m venv venv && source venv/bin/activate`
+
+2) Install
+- `pip install -r requirements.txt`
+- Optional dependencies:
+  - Playwright (JS rendering): `pip install playwright && playwright install`
+  - PSI (Lighthouse/CrUX): needs a Google API key (config below)
+
+3) Single-Page Audit (CLI)
+- `python app.py https://www.example.com`
+- Saves report to `reports/seo_report_<domain>_<timestamp>.json`
+
+4) Full Site Audit (CLI)
+- Example (mobile UA, filters, concurrency, exports):
+```
+python app.py https://www.example.com \
+  --full-audit --max-pages 200 --max-depth 3 \
+  --respect-robots --rate-limit 1.5 --workers 6 --mobile \
+  --export-csv reports/example_audit \
+  --include-path /blog --exclude-path re:^/admin --render-js
+```
+- Output:
+  - JSON report at `reports/site_audit_<domain>_<timestamp>.json`
+  - If `--export-csv` provided: `pages.csv`, `issues.csv`, `edges.csv`
+
+## CLI Usage
+
+- Single page:
+  - `python app.py <URL> [--keywords ...] [--config path.json] [--output json|txt]`
+- Full site audit:
+  - `--full-audit`: enable crawl + multi-page analysis
+  - `--max-pages`, `--max-depth`, `--rate-limit`
+  - `--include-subdomains`, `--same-domain-only`, `--respect-robots`/`--ignore-robots`
+  - `--include-path`, `--exclude-path` (prefix or `re:<pattern>`; repeatable)
+  - `--workers` (concurrent analysis), `--mobile` (mobile UA), `--render-js` (Playwright)
+  - `--auth-user`, `--auth-pass` for basic auth
+  - `--export-csv <dir>` for CSVs
+  - `--compare-report <file>` to diff two site audit JSONs
+
+## API Usage (Flask)
+
+Run without a URL to start the API:
+- `python app.py`
+- POST/GET `http://127.0.0.1:5000/analyze?url=https://www.example.com`
+- Optional `keywords` (CSV or JSON array)
+- Response mirrors the single-page JSON structure.
+
+## Configuration
+
+Config may be supplied via `--config path.json` or edited in `app.py`’s `DEFAULT_CONFIG`.
+
+Example snippet:
+```json
+{
+  "OnPageAnalyzer": {
+    "title_min_length": 20,
+    "title_max_length": 70,
+    "desc_min_length": 70,
+    "desc_max_length": 160
+  },
+  "TechnicalSEOAnalyzer": {
+    "enable_pagespeed_insights": true,
+    "psi_api_key": "YOUR_GOOGLE_API_KEY",
+    "psi_strategy": "mobile",
+    "max_inline_js_to_check_minification": 3,
+    "max_js_to_check_minification": 10
+  },
+  "ContentAnalyzer": {
+    "top_n_keywords_count": 10,
+    "spellcheck_language": "en"
+  },
+  "ScoringModule": {
+    "weights": {},
+    "category_weights": { "OnPage": 0.40, "Technical": 0.35, "Content": 0.25 }
+  },
+  "FullSiteAudit": {
+    "max_pages": 150,
+    "max_depth": 3,
+    "respect_robots": true,
+    "same_domain_only": true,
+    "include_subdomains": false,
+    "rate_limit_rps": 1.5,
+    "workers": 6,
+    "include_paths": ["/blog"],
+    "exclude_paths": ["re:^/admin"],
+    "render_js": true
+  },
+  "Global": {
+    "request_timeout": 12,
+    "user_agent": "Mozilla/5.0 ...",
+    "accept_language": "en-US,en;q=0.8",
+    "http_retries_total": 2,
+    "http_backoff_factor": 0.2,
+    "http_status_forcelist": [429,500,502,503,504],
+    "http_allowed_retry_methods": ["HEAD","GET","OPTIONS"]
+  }
+}
+```
+
+## Output & Exports
+
+- Single-page JSON (top-level):
+  - `seo_attributes.OnPageAnalyzer` (title/meta, headings, links, images, content stats, URL checks)
+  - `seo_attributes.TechnicalSEOAnalyzer` (headers, protocol, indexability, structured data, assets, PSI if enabled, llms.txt, redirects, robots/sitemap, SPF, ads.txt)
+  - `seo_attributes.ContentAnalyzer` (keywords, readability, ratio, spelling)
+  - `seo_attributes.ScoringModule` (category and overall scores)
+
+- Site audit JSON:
+  - `site_audit.summary`: status distribution, redirect loops, health score, duplicate groups, link graph metrics, sitemap summary, aggregate scores
+  - `site_audit.pages`: list of per-URL page results (same structure as single-page attributes)
+  - `site_audit.issues`: flattened issues with `url`, `code`, `title`, `severity`, `category`, `details`
+  - `site_audit.config_used`: crawl and worker config used; optional `exports` with CSV paths
+
+- CSVs (if `--export-csv`):
+  - `pages.csv`: URL, scores, HTTP status, TTFB, canonical/sitemap flags, schema, word count, H1 count, links, title, meta description
+  - `issues.csv`: URL, code, title, severity, category, details
+  - `edges.csv`: source, target, rel (internal link graph)
+
+## Optional Dependencies
+
+- `pyspellchecker`: content spell checks
+- `dnspython`: SPF lookup
+- `Pillow`: optional image-related utilities
+- `flask`: API mode
+- `playwright`: optional JS rendering for discovery (`--render-js`)
+- PageSpeed Insights: requires Google API key (`enable_pagespeed_insights`)
+
+## Roadmap
+
+- Rendered HTML analysis (Playwright) for per-page analyzers and JS error capture
+- Deeper structured data validation (rule-based, 190+ checks)
+- Expanded issue catalog and weighting
+- PSI/CrUX integration into health scoring/outlier detection
+- GSC/GA integrations and IndexNow submissions
+- Segmented crawling and richer URL detail panels
+
+## Contributing & License
+
+- Contributions welcome! Please open issues/PRs for features and fixes.
+- MIT License. See `LICENSE`.
+

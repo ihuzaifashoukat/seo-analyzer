@@ -1,6 +1,12 @@
 # modules/base_module.py
 from abc import ABC, abstractmethod
 import requests
+from requests.adapters import HTTPAdapter
+try:
+    from urllib3.util.retry import Retry
+except Exception:
+    # Fallback shim if urllib3 Retry isn't importable in environment
+    Retry = None
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 
@@ -14,10 +20,40 @@ class SEOModule(ABC):
         self.module_name = self.__class__.__name__
         self.config = config if config else {} # Store module-specific config
         self.global_config = self.config.get("Global", {}) # Get global config if passed down
-        
+
+        # Headers and HTTP session with retries
+        default_ua = self.global_config.get(
+            "user_agent",
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        )
+        accept_lang = self.global_config.get("accept_language", "en-US,en;q=0.8")
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': default_ua,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': accept_lang,
         }
+
+        self.session = requests.Session()
+        # Configure retries if possible
+        retries_total = int(self.global_config.get("http_retries_total", 2))
+        backoff = float(self.global_config.get("http_backoff_factor", 0.2))
+        status_forcelist = self.global_config.get("http_status_forcelist", [429, 500, 502, 503, 504])
+        allowed_methods = self.global_config.get("http_allowed_retry_methods", ["HEAD", "GET", "OPTIONS"])
+        if Retry is not None and retries_total > 0:
+            retry_cfg = Retry(
+                total=retries_total,
+                connect=retries_total,
+                read=retries_total,
+                backoff_factor=backoff,
+                status_forcelist=status_forcelist,
+                allowed_methods=set(m.upper() for m in allowed_methods),
+                raise_on_status=False,
+            )
+            adapter = HTTPAdapter(max_retries=retry_cfg)
+            self.session.mount('http://', adapter)
+            self.session.mount('https://', adapter)
+        # Update session headers
+        self.session.headers.update(self.headers)
         # Potentially add common configuration here, e.g., API keys if shared
 
     @abstractmethod
@@ -46,16 +82,39 @@ class SEOModule(ABC):
         """
         timeout = self.global_config.get("request_timeout", 10) # Use configured timeout
         try:
-            response = requests.get(url, headers=self.headers, timeout=timeout)
-            response.raise_for_status()  # Raises an HTTPError for bad responses (4XX or 5XX)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            return soup
+            resp = self.session.get(url, timeout=timeout)
+            resp.raise_for_status()
+            return BeautifulSoup(resp.content, 'html.parser')
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching URL {url} in {self.module_name}: {e}")
+            if self.global_config.get("debug"):
+                print(f"Error fetching URL {url} in {self.module_name}: {e}")
             return None
         except Exception as e:
-            print(f"An unexpected error occurred while fetching {url} in {self.module_name}: {e}")
+            if self.global_config.get("debug"):
+                print(f"An unexpected error occurred while fetching {url} in {self.module_name}: {e}")
             return None
+
+    def request(self, method: str, url: str, **kwargs):
+        """
+        Thin wrapper around session.request adding default timeout and returning (response, elapsed_seconds).
+        """
+        timeout = kwargs.pop("timeout", self.global_config.get("request_timeout", 10))
+        try:
+            from datetime import datetime
+            start = datetime.now()
+            resp = self.session.request(method=method, url=url, timeout=timeout, **kwargs)
+            elapsed = (datetime.now() - start).total_seconds()
+            return resp, elapsed
+        except requests.exceptions.RequestException as e:
+            if self.global_config.get("debug"):
+                print(f"Request error for {url} in {self.module_name}: {e}")
+            return None, None
+
+    def head(self, url: str, **kwargs):
+        return self.request("HEAD", url, **kwargs)
+
+    def get(self, url: str, **kwargs):
+        return self.request("GET", url, **kwargs)
 
     def get_module_name(self) -> str:
         """Returns the name of the module."""
